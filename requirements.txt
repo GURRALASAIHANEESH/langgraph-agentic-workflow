@@ -3,9 +3,9 @@ python-dotenv
 openai
 tavily-python
 
-# Langchain ecosystem (working combo)
+# ✅ Stable & compatible versions
 langchain==0.1.17
 langchain-community==0.0.29
 langchain-openai==0.0.8
-langchain-tavily==0.0.7
+langchain-tavily==0.1.6
 langgraph==0.0.40

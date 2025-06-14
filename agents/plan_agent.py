@@ -1,36 +1,34 @@
 from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
+import os, re
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
 
 llm = ChatOpenAI(
     temperature=0,
-    model_name="openai/gpt-3.5-turbo",
-    openai_api_key=os.getenv("OPENAI_API_KEY"),  # ✅ Fixed
+    model_name="gpt-3.5-turbo",
+    openai_api_key=os.getenv("OPENAI_API_KEY"),
     openai_api_base=os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
 )
 
-# Prompt template
 prompt = PromptTemplate(
     input_variables=["input"],
     template="""
-You are a task planner AI. Break the following high-level request into 3 to 5 clear and actionable subtasks:
+You are a task planner AI. Break the user's high-level request into 3–5 clear and actionable subtasks.
 
-User Query: {input}
+Request: {input}
 
-Subtasks (as a list):
+Subtasks:
 """
 )
 
-# LLM chain
 chain = LLMChain(llm=llm, prompt=prompt)
 
-# PlanAgent function
 def plan_agent(user_input: str) -> list:
+    if re.fullmatch(r"\s*\d+\s*[\+\-\*/]\s*\d+\s*", user_input):
+        return [user_input.strip()]
     response = chain.invoke({"input": user_input})
-    response_text = response["text"] if isinstance(response, dict) and "text" in response else str(response)
-    subtasks = [line.strip("-• \n") for line in response_text.split("\n") if line.strip()]
-    return subtasks
+    text = response.get("text", str(response))
+    return [line.strip("-• \n") for line in text.split("\n") if line.strip()]

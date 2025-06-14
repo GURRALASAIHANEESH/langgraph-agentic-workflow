@@ -1,4 +1,5 @@
-from langgraph.graph import StateGraph, END, TypedState
+from langgraph.graph import StateGraph, END
+
 from typing import Annotated, List, TypedDict
 
 from agents.plan_agent import plan_agent
@@ -6,7 +7,7 @@ from agents.tool_agent import tool_agent
 from agents.refine_agent import refine_tasks
 from agents.reflect_agent import reflect_on_results
 
-class GraphState(TypedState):
+class GraphState(TypedDict):
     input: str
     results: list[str]
     subtasks: list[str]

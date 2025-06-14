@@ -1,20 +1,25 @@
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from dotenv import load_dotenv
 import os
 
+# Load environment variables
 load_dotenv()
 
+# Get keys from environment
 openai_key = os.getenv("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")
-os.environ["OPENAI_API_BASE"] = "https://openrouter.ai/api/v1"
+openai_base = os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
 
+# Initialize LLM
 llm = ChatOpenAI(
     temperature=0,
     model_name="openai/gpt-3.5-turbo",
-    openai_api_base=os.environ["OPENAI_API_BASE"]
+    openai_api_key=openai_key,
+    openai_api_base=openai_base
 )
 
+# Define reflection prompt
 prompt = PromptTemplate(
     input_variables=["input", "results"],
     template="""
@@ -32,21 +37,22 @@ Reply with:
 """
 )
 
+# Reflection chain
 reflect_chain = LLMChain(llm=llm, prompt=prompt)
 
+# Main reflection logic
 def reflect_on_results(state):
-    response = reflect_chain.run({
+    response = reflect_chain.invoke({
         "input": state["input"],
         "results": "\n".join(state["results"])
     })
 
-    # Decide what to do
-    if "NO" in response.upper():
-        # Add a retry limit counter
+    response_text = response["text"] if isinstance(response, dict) and "text" in response else str(response)
+
+    if "NO" in response_text.upper():
         state["retry_count"] = state.get("retry_count", 0) + 1
-        if state["retry_count"] > 2:  # Don't loop more than 2 times
-            state["done"] = True  # Force end
-        else:
-            state["done"] = False
+        state["done"] = state["retry_count"] > 2  # Stop after 2 retries
     else:
         state["done"] = True
+
+    return state

@@ -1,8 +1,9 @@
-langgraph
+streamlit
 langchain
+langgraph
 langchain-community
 langchain-openai
 langchain-tavily
 openai
 tavily-python
-streamlit
+python-dotenv

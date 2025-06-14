@@ -1,62 +1,53 @@
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from typing import TypedDict, List, Union
 from langgraph.graph import StateGraph, END
+from langgraph.graph.schema import TypedState
+from typing import Annotated, List, TypedDict
 from agents.plan_agent import plan_agent
 from agents.tool_agent import tool_agent
-from agents.refine_agent import refine_tasks
+from agents.refine_agent import refine_agent
 from agents.reflect_agent import reflect_on_results
 
-
-
-# Define the schema for your state
-class AgentState(TypedDict):
+class GraphState(TypedDict):
     input: str
-    subtasks: List[str]
     results: List[str]
+    subtasks: List[str]
+    retry_count: int
     done: bool
-    retry_count: int 
 
-# PlanAgent function
-def add_plan(state: AgentState) -> AgentState:
+state_schema = TypedState(
+    input=str,
+    results=Annotated[List[str], lambda x: x or []],
+    subtasks=Annotated[List[str], lambda x: x or []],
+    retry_count=int,
+    done=bool
+)
+
+def add_plan(state: GraphState) -> GraphState:
     subtasks = plan_agent(state["input"])
-    return {"input": state["input"], "subtasks": subtasks, "results": [], "done": False}
+    return {**state, "subtasks": subtasks}
 
-# ToolAgent function
-def execute_next_task(state: AgentState) -> AgentState:
-    if not state["subtasks"]:
-        state["done"] = True
-        return state
-    
-    task = state["subtasks"].pop(0)
+def run_tool(state: GraphState) -> GraphState:
+    task = state["subtasks"][0]
     result = tool_agent(task)
-    state["results"].append(result)
-    return state
+    return {
+        **state,
+        "results": state["results"] + [result],
+        "subtasks": state["subtasks"][1:]
+    }
 
-# Build LangGraph
+def should_continue(state: GraphState) -> str:
+    return "end" if state.get("done") or not state["subtasks"] else "continue"
+
 def build_graph():
-    builder = StateGraph(state_schema=AgentState)
+    workflow = StateGraph(GraphState)
+    workflow.add_node("Plan", add_plan)
+    workflow.add_node("Refine", refine_agent)
+    workflow.add_node("Execute", run_tool)
+    workflow.add_node("Reflect", reflect_on_results)
 
-    builder.add_node("Plan", add_plan)
-    builder.add_node("Refine", refine_tasks)
-    builder.add_node("Execute", execute_next_task)
-    builder.add_node("Reflect", reflect_on_results)  
+    workflow.set_entry_point("Plan")
+    workflow.add_edge("Plan", "Refine")
+    workflow.add_edge("Refine", "Execute")
+    workflow.add_conditional_edges("Execute", should_continue, {"continue": "Reflect", "end": END})
+    workflow.add_conditional_edges("Reflect", should_continue, {"continue": "Refine", "end": END})
 
-    builder.set_entry_point("Plan")
-    builder.add_edge("Plan", "Refine")
-    builder.add_edge("Refine", "Execute")
-
-    # Loop execution till subtasks are empty
-    builder.add_conditional_edges(
-        "Execute",
-        lambda state: "Reflect" if state.get("done") else "Execute"
-    )
-
-    # Final check in Reflect node
-    builder.add_conditional_edges(
-        "Reflect",
-        lambda state: END if state.get("done") else "Plan"
-    )
-
-    return builder.compile()
+    return workflow.compile()

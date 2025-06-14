@@ -1,26 +1,19 @@
-import os
-os.environ["LANGGRAPH_RECURSION_LIMIT"] = "50"
 import streamlit as st
 from workflows.workflow import build_graph
 
-# Build LangGraph once
+st.set_page_config(page_title="Agentic LangGraph", layout="centered")
+st.title("🧠 LangGraph Agentic Workflow")
+st.markdown("Enter a task and see how the agent plans, refines, solves, and reflects on it.")
+
 graph = build_graph()
+user_input = st.text_area("Enter your query:", height=100)
 
-st.set_page_config(page_title="LangGraph Agentic Workflow", layout="centered")
-
-st.title(" Agentic Task Solver")
-st.markdown("Built with LangGraph, OpenRouter, and real tools.")
-
-# Text input from user
-user_input = st.text_area("Enter your query here:", height=100)
-
-if st.button("Run Workflow"):
-    if not user_input.strip():
-        st.warning("Please enter a query.")
-    else:
+if st.button("Run Agent Workflow"):
+    if user_input.strip():
         with st.spinner("Thinking..."):
-            result = graph.invoke({"input": user_input})
-
-        st.subheader("Final Results:")
+            result = graph.invoke({"input": user_input, "results": [], "subtasks": [], "retry_count": 0, "done": False})
+        st.subheader("✅ Final Output:")
         for step in result["results"]:
             st.markdown(f"- {step}")
+    else:
+        st.warning("Please enter a query.")

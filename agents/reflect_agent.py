@@ -3,23 +3,17 @@ from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 from dotenv import load_dotenv
 import os
-
-# Load environment variables
+# Load API keys
 load_dotenv()
 
-# Get keys from environment
-openai_key = os.getenv("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")
-openai_base = os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
-
-# Initialize LLM
 llm = ChatOpenAI(
     temperature=0,
     model_name="openai/gpt-3.5-turbo",
-    openai_api_key=openai_key,
-    openai_api_base=openai_base
+    openai_api_key=os.getenv("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"),
+    openai_api_base=os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
 )
 
-# Define reflection prompt
+# Prompt for reflection
 prompt = PromptTemplate(
     input_variables=["input", "results"],
     template="""
@@ -37,10 +31,8 @@ Reply with:
 """
 )
 
-# Reflection chain
 reflect_chain = LLMChain(llm=llm, prompt=prompt)
 
-# Main reflection logic
 def reflect_on_results(state):
     response = reflect_chain.invoke({
         "input": state["input"],

@@ -6,38 +6,48 @@ import os
 
 load_dotenv()
 
+# ✅ Load API config
 llm = ChatOpenAI(
     temperature=0,
-    model_name="openai/gpt-3.5-turbo",
+    model_name="gpt-3.5-turbo",
     openai_api_key=os.getenv("OPENAI_API_KEY"),
     openai_api_base=os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
 )
 
+# ✅ Prompt for refining subtasks
 prompt = PromptTemplate(
     input_variables=["input", "subtasks", "results"],
     template="""
-You're a refinement agent. The user wants to: {input}
+You're a smart refinement agent helping improve a task execution plan.
 
-Current subtasks:
+Original request: {input}
+
+Current Subtasks:
 {subtasks}
 
-Completed results so far:
+Results Completed So Far:
 {results}
 
-Refine the subtasks list. Keep, remove, or add subtasks to make the plan more complete.
-Return the updated subtask list as a bullet list.
+Please refine the subtasks:
+- Improve clarity
+- Remove duplicates
+- Add any missing tasks
+Return ONLY the refined subtasks as a bullet list.
 """
 )
 
 refine_chain = LLMChain(llm=llm, prompt=prompt)
 
 def refine_tasks(state):
-    response = refine_chain.invoke({
-        "input": state["input"],
-        "subtasks": "\n".join(state["subtasks"]),
-        "results": "\n".join(state["results"])
-    })
-    response_text = response["text"] if isinstance(response, dict) and "text" in response else str(response)
-    subtasks = [line.strip("-• \n") for line in response_text.split("\n") if line.strip()]
-    return {**state, "subtasks": subtasks}
-
+    """Refines the subtask list based on current input and results."""
+    try:
+        response = refine_chain.invoke({
+            "input": state["input"],
+            "subtasks": "\n".join(state.get("subtasks", [])),
+            "results": "\n".join(state.get("results", [])),
+        })
+        text = response.get("text", str(response))
+        refined_subtasks = [line.strip("-• \n") for line in text.split("\n") if line.strip()]
+        return {**state, "subtasks": refined_subtasks}
+    except Exception as e:
+        return {**state, "subtasks": state.get("subtasks", []), "results": state.get("results", []) + [f"Refine Error: {e}"]}

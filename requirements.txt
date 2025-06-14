@@ -1,9 +1,11 @@
 streamlit
-langchain
-langchain-community
-langchain-openai
-langchain-tavily
+python-dotenv
 openai
 tavily-python
-python-dotenv
-langgraph==0.0.40  # ✅ explicitly pinned
+
+# ✅ Compatible versions (confirmed to work together)
+langchain==0.1.17
+langchain-community==0.0.29
+langchain-openai==0.0.8
+langchain-tavily==0.0.7
+langgraph==0.0.40

@@ -1,7 +1,5 @@
 from langgraph.graph import StateGraph, END
-
-from typing import Annotated, List, TypedDict
-
+from typing import TypedDict
 from agents.plan_agent import plan_agent
 from agents.tool_agent import tool_agent
 from agents.refine_agent import refine_tasks
@@ -15,8 +13,7 @@ class GraphState(TypedDict):
     done: bool
 
 def add_plan(state: GraphState) -> GraphState:
-    subtasks = plan_agent(state["input"])
-    return {**state, "subtasks": subtasks}
+    return {**state, "subtasks": plan_agent(state["input"])}
 
 def run_tool(state: GraphState) -> GraphState:
     task = state["subtasks"][0]

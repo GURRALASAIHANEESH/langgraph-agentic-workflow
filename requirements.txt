@@ -3,8 +3,9 @@ python-dotenv
 openai
 tavily-python
 
-# ✅ Compatible LangChain setup
+# ✅ Compatible Langchain & LangGraph setup
 langchain==0.1.17
 langchain-community==0.0.36
 langchain-openai==0.0.8
 langgraph==0.0.40
+

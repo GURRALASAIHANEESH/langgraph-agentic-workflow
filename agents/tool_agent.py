@@ -1,8 +1,8 @@
 from langchain_community.chat_models import ChatOpenAI
 from langchain.agents import Tool, initialize_agent, AgentType
 from langchain.tools import tool
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -10,34 +10,33 @@ llm = ChatOpenAI(
     temperature=0,
     model_name="openai/gpt-3.5-turbo",
     openai_api_key=os.getenv("OPENAI_API_KEY"),
-    openai_api_base=os.getenv("OPENAI_API_BASE")
+    openai_api_base=os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
 )
 
-# ✅ Correct calculator with docstring (required)
 @tool
 def calculator_tool(expression: str) -> str:
-    """Performs basic math operations like addition, subtraction, etc."""
+    """Performs arithmetic operations like add, subtract, multiply."""
     try:
-        result = eval(expression)
-        return str(result)
+        return str(eval(expression))
     except Exception as e:
         return f"Error: {e}"
 
-# ✅ Define tools list
+@tool
+def knowledge_helper(question: str) -> str:
+    """Useful for coding or general questions (Java, Python, logic, etc)."""
+    return llm.predict(question)
+
 tools = [
-    Tool.from_function(
-        func=calculator_tool,
-        name="Calculator",
-        description="Useful for basic math problems like add, subtract, multiply, divide"
-    )
+    Tool.from_function(func=calculator_tool, name="Calculator", description="Performs basic arithmetic."),
+    Tool.from_function(func=knowledge_helper, name="KnowledgeHelper", description="Handles general/coding questions.")
 ]
 
-# ✅ Initialize agent
 agent = initialize_agent(
     tools=tools,
     llm=llm,
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=True
+    verbose=True,
+    handle_parsing_errors=True
 )
 
 def tool_agent(task: str) -> str:

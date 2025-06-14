@@ -2,11 +2,12 @@ from langchain_community.chat_models import ChatOpenAI
 from langchain.agents import Tool, initialize_agent, AgentType
 from langchain.tools import tool
 from langchain_community.tools.tavily_search.tool import TavilySearchResults
+from dotenv import load_dotenv
 import os
 
+load_dotenv()
 
-# OpenRouter for LLM
-os.environ["OPENAI_API_KEY"] = "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"
+openai_key = os.getenv("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")
 os.environ["OPENAI_API_BASE"] = "https://openrouter.ai/api/v1"
 
 llm = ChatOpenAI(
@@ -24,8 +25,8 @@ def calculator_tool(expression: str) -> str:
     except Exception as e:
         return f"Error: {e}"
 
-# ✅ Tool 2: Web search using Tavily
-os.environ["TAVILY_API_KEY"] = "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"  # Get from https://app.tavily.com/
+#\ Get from https://app.tavily.com/
+tavily_key = os.getenv("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")
 
 search = TavilySearchResults()
 

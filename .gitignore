@@ -17,3 +17,5 @@ venv/
 # Ignore Streamlit config or videos
 .streamlit/
 video.mp4
+.env
+

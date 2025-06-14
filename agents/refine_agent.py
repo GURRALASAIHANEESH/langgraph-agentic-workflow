@@ -1,10 +1,10 @@
 from langchain_community.chat_models import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-import os
+from dotenv import load_dotenv
 
-# Use OpenRouter
-os.environ["OPENAI_API_KEY"] = "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"
+import os
+openai_key = os.getenv("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")
 os.environ["OPENAI_API_BASE"] = "https://openrouter.ai/api/v1"
 
 llm = ChatOpenAI(

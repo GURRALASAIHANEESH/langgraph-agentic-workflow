@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: langgraph-agentic-app
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run app_streamlit.py
+    plan: free
+    envVars:
+      - key: OPENAI_API_KEY
+        sync: false     # ⛔️ DO NOT expose your key in this file
+      - key: OPENAI_API_BASE
+        value: https://openrouter.ai/api/v1

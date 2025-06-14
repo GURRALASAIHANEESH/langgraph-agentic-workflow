@@ -6,4 +6,4 @@ langchain-tavily
 openai
 tavily-python
 python-dotenv
-langgraph
+langgraph==0.0.40  # ✅ explicitly pinned

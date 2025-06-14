@@ -6,11 +6,10 @@ from agents.tool_agent import tool_agent
 from agents.refine_agent import refine_tasks
 from agents.reflect_agent import reflect_on_results
 
-@state_schema
-class GraphState(TypedDict):
+class GraphState(TypedState):
     input: str
-    results: Annotated[List[str], lambda x: x or []]
-    subtasks: Annotated[List[str], lambda x: x or []]
+    results: list[str]
+    subtasks: list[str]
     retry_count: int
     done: bool
 

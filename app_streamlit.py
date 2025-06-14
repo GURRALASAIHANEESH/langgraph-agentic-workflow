@@ -11,9 +11,17 @@ user_input = st.text_area("Enter your query:", height=100)
 if st.button("Run Agent Workflow"):
     if user_input.strip():
         with st.spinner("Thinking..."):
-            result = graph.invoke({"input": user_input, "results": [], "subtasks": [], "retry_count": 0, "done": False})
-        st.subheader("✅ Final Output:")
-        for step in result["results"]:
-            st.markdown(f"- {step}")
-    else:
-        st.warning("Please enter a query.")
+            try:
+                result = graph.invoke({
+                    "input": user_input,
+                    "results": [],
+                    "subtasks": [],
+                    "retry_count": 0,
+                    "done": False
+                })
+                st.subheader("✅ Final Output:")
+                for step in result["results"]:
+                    st.markdown(f"- {step}")
+            except Exception as e:
+                st.error(f"🔥 Workflow failed: {e}")
+

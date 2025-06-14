@@ -1,0 +1,19 @@
+# Ignore Python artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+venv/
+.venv/
+
+# Ignore system/IDE files
+.DS_Store
+*.swp
+*.swo
+.vscode/
+
+# Ignore Streamlit config or videos
+.streamlit/
+video.mp4

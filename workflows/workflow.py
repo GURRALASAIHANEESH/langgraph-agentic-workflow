@@ -1,4 +1,4 @@
-from langgraph.graph import StateGraph, END, state_schema
+from langgraph.graph import StateGraph, END, TypedState
 from typing import Annotated, List, TypedDict
 
 from agents.plan_agent import plan_agent

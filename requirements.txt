@@ -1,14 +1,12 @@
-# Streamlit + env
 streamlit
 python-dotenv
-
-# OpenAI-compatible + Tavily client
 openai
 tavily-python
 
-# ✅ Compatible Langchain ecosystem
-langchain==0.1.17
-langchain-community==0.0.36
-langchain-openai==0.0.8
+# ✅ Compatible Langchain Ecosystem (Latest stable combo)
+langchain==0.3.22
+langchain-community==0.0.41
+langchain-openai==0.1.6
 langchain-tavily==0.2.2
 langgraph==0.0.40
+

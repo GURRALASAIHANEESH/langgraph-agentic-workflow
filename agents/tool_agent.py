@@ -16,10 +16,12 @@ llm = ChatOpenAI(
 
 @tool
 def calculator_tool(expression: str) -> str:
+    """Performs basic arithmetic like addition, subtraction, etc."""  # ✅ This is what it needs
     try:
         return str(eval(expression))
     except Exception as e:
         return f"Error: {e}"
+
 
 search = TavilySearchResults()
 

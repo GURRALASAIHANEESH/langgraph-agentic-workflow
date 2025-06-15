@@ -38,4 +38,5 @@ def plan_agent(user_input: str) -> list:
         return [user_input.strip()]
     response = chain.invoke({"input": user_input})
     text = response.get("text", str(response))
+    print("🔍 PlanAgent Output:\n", text)
     return [line.strip("-• \n") for line in text.split("\n") if line.strip()]

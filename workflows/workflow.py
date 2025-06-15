@@ -13,7 +13,8 @@ class GraphState(TypedDict):
     done: bool
 
 def add_plan(state: GraphState) -> GraphState:
-    return {**state, "subtasks": plan_agent(state["input"])}
+    subtasks = plan_agent(state["input"])
+    return {**state, "subtasks": subtasks}
 
 def run_tool(state: GraphState) -> GraphState:
     task = state["subtasks"][0]
@@ -33,11 +34,9 @@ def build_graph():
     builder.add_node("Refine", refine_tasks)
     builder.add_node("Execute", run_tool)
     builder.add_node("Reflect", reflect_on_results)
-
     builder.set_entry_point("Plan")
     builder.add_edge("Plan", "Refine")
     builder.add_edge("Refine", "Execute")
     builder.add_conditional_edges("Execute", should_continue, {"continue": "Reflect", "end": END})
     builder.add_conditional_edges("Reflect", should_continue, {"continue": "Refine", "end": END})
-
     return builder.compile()

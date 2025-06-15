@@ -36,13 +36,11 @@ def reflect_on_results(state):
     })
 
     answer = response.get("text", str(response)).strip().upper()
-    print("🪞 Reflect says:", answer)
 
     state["retry_count"] = state.get("retry_count", 0) + 1
+
     if "NO" in answer:
-        # Allow only 2 retries
         if state["retry_count"] >= 2:
-            print("⚠️ Max retries hit. Forcing end.")
             state["done"] = True
         else:
             state["done"] = False

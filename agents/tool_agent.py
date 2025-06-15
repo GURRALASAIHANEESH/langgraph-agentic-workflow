@@ -5,9 +5,9 @@ from langchain_community.tools.tavily_search.tool import TavilySearchResults
 from dotenv import load_dotenv
 import os
 
-# Load environment variables
 load_dotenv()
 
+# ✅ LLM setup
 llm = ChatOpenAI(
     temperature=0,
     model_name="gpt-3.5-turbo",
@@ -15,45 +15,54 @@ llm = ChatOpenAI(
     openai_api_base=os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
 )
 
-# ✅ Tool 1: Calculator
+# ✅ Calculator tool
 @tool
-def calculator_tool(expression: str) -> str:
-    """Useful for solving basic math expressions like 2+2 or 10/5."""
+def calculator(expression: str) -> str:
+    """Useful for solving math problems like 2+2, 7*3, etc."""
     try:
         return str(eval(expression))
     except Exception as e:
-        return f"Math error: {str(e)}"
+        return f"Error: {e}"
 
-# ✅ Tool 2: Tavily Search
-tavily_api_key = os.getenv("TAVILY_API_KEY")
-if not tavily_api_key:
-    raise EnvironmentError("TAVILY_API_KEY not set in environment")
-
-search_tool = TavilySearchResults(api_key=tavily_api_key)
+# ✅ Search tool (Tavily)
+tavily_key = os.getenv("TAVILY_API_KEY")
+search = TavilySearchResults(api_key=tavily_key)
 
 # ✅ Tool list
 tools = [
     Tool.from_function(
-        func=calculator_tool,
+        func=calculator,
         name="Calculator",
-        description="Use this to solve basic math problems.",
+        description="Use for arithmetic or math expressions. Input should be like '2+2' or '15 / 3'"
     ),
-    search_tool
+    search
 ]
 
-# ✅ Create Agent
-agent_executor = initialize_agent(
+# ✅ Force tools to be used via system message
+system_instruction = (
+    "You are an intelligent agent. You MUST always respond in the following format:\n"
+    "Thought: describe what you are thinking\n"
+    "Action: the tool to use (Calculator or TavilySearchResults)\n"
+    "Action Input: the input to the tool\n"
+    "When you get a result, reply like this:\n"
+    "Observation: tool output\n"
+    "Final Answer: the final result\n"
+)
+
+# ✅ Custom prompt wrapper for tools
+agent = initialize_agent(
     tools=tools,
     llm=llm,
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     verbose=True,
     handle_parsing_errors=True,
+    agent_kwargs={"system_message": system_instruction}
 )
 
-# ✅ Tool Agent Logic
+# ✅ Tool Agent function
 def tool_agent(task: str) -> str:
     try:
-        response = agent_executor.run(task)
-        return f"Result: {response}"
+        result = agent.run(task)
+        return f"Result: {result}"
     except Exception as e:
         return f"Tool error: {e}"

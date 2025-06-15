@@ -13,20 +13,17 @@ llm = ChatOpenAI(
     openai_api_base=os.getenv("OPENAI_API_BASE")
 )
 
-prompt = PromptTemplate(
+prompt =PromptTemplate(
     input_variables=["input", "results"],
     template="""
-You are a reflection agent. The original user request was:
-"{input}"
+You are a reflection agent. The user wanted to: {input}
 
-The system completed these subtasks:
+Here are the completed results:
 {results}
 
-Question: Does the result fully satisfy the original request?
-
-Reply with:
-- "YES" if complete.
-- "NO" if more steps are needed.
+Is the user's request fully completed?
+- Reply with "YES" if all subtasks are completed correctly.
+- Reply with "NO" if anything is missing or wrong.
 """
 )
 

@@ -13,5 +13,8 @@ if st.button("Run Agent Workflow"):
         with st.spinner("Thinking..."):
             result = graph.invoke({"input": user_input, "results": [], "subtasks": [], "retry_count": 0, "done": False},config={"recursion_limit": 10})
             st.subheader("✅ Final Output:")
-            for step in result["results"]:
-                st.markdown(f"- {step}")
+            if "results" in result:
+                for i, step in enumerate(result["results"], 1):
+                    st.markdown(f"**Step {i}:** {step}") # Corrected indentation here
+            else:
+                st.warning("No results were returned.")

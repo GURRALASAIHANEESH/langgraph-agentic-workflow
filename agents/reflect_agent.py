@@ -10,17 +10,23 @@ llm = ChatOpenAI(
     temperature=0,
     model_name="gpt-3.5-turbo",
     openai_api_key=os.getenv("OPENAI_API_KEY"),
-    openai_api_base=os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
+    openai_api_base=os.getenv("OPENAI_API_BASE")
 )
 
 prompt = PromptTemplate(
     input_variables=["input", "results"],
     template="""
-Original request: {input}
-Subtask results:
+You are a reflection agent. The original user request was:
+"{input}"
+
+The system completed these subtasks:
 {results}
 
-Does this fully solve the original request? Answer YES or NO.
+Question: Does the result fully satisfy the original request?
+
+Reply with:
+- "YES" if complete.
+- "NO" if more steps are needed.
 """
 )
 

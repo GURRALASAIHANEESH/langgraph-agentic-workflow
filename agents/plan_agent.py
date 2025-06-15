@@ -15,13 +15,21 @@ llm = ChatOpenAI(
 
 prompt = PromptTemplate(
     input_variables=["input"],
-    template="""
-You are a task planner AI. Break the user's high-level request into 3–5 clear and actionable subtasks.
+   template="""
+You're a smart planner bot. Your job is to split the user's request into 4–6 clear, actionable steps that a virtual assistant can perform.
 
-Request: {input}
+User Query: {input}
+
+Make sure each step is:
+- Specific
+- Can be answered via a search or simple logic
+- Ordered logically
+
+Return only the list.
 
 Subtasks:
 """
+
 )
 
 chain = LLMChain(llm=llm, prompt=prompt)

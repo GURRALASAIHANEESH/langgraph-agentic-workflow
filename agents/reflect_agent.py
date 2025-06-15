@@ -37,9 +37,13 @@ def reflect_on_results(state):
         "input": state["input"],
         "results": "\n".join(state["results"])
     })
-    if "NO" in response.upper() or "not complete" in response.lower() or "needs" in response.lower():
+    if "NO" in response.upper():
         state["retry_count"] = state.get("retry_count", 0) + 1
-        state["done"] = state["retry_count"] > 2
+        if state["retry_count"] > 2:
+            state["done"] = True  # Break infinite loop
+        else:
+            state["done"] = False # Corrected indentation
     else:
-        state["done"] = True
+        state["done"] = True # Corrected indentation
+
     return state

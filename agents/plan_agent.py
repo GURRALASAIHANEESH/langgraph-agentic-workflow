@@ -10,12 +10,12 @@ llm = ChatOpenAI(
     temperature=0,
     model_name="gpt-3.5-turbo",
     openai_api_key=os.getenv("OPENAI_API_KEY"),
-    openai_api_base=os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
+    openai_api_base=os.getenv("OPENAI_API_BASE")
 )
 
 prompt = PromptTemplate(
     input_variables=["input"],
-   template="""
+    template="""
 You're a smart planner bot. Your job is to split the user's request into 4–6 clear, actionable steps that a virtual assistant can perform.
 
 User Query: {input}
@@ -29,7 +29,6 @@ Return only the list.
 
 Subtasks:
 """
-
 )
 
 chain = LLMChain(llm=llm, prompt=prompt)

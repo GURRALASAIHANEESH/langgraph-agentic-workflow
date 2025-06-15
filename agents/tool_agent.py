@@ -69,6 +69,8 @@ agent = initialize_agent(
 def tool_agent(task: str) -> str:
     try:
         result = agent.run(task)
-        return f"Result: {result}"
+        if not result or result.strip().upper() in ["N/A", "NONE", ""]:
+            return "Tool could not retrieve a meaningful result."
+        return f"Result: {result.strip()}"
     except Exception as e:
         return f"Tool error: {e}"

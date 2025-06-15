@@ -17,23 +17,24 @@ llm = ChatOpenAI(
 # ✅ Prompt for refining subtasks
 prompt = PromptTemplate(
     input_variables=["input", "subtasks", "results"],
-    template="""
-You're a smart refinement agent helping improve a task execution plan.
+template="""
+You're a refinement agent.
 
-Original request: {input}
-
-Current Subtasks:
+The user wants to: {input}
+Initial subtasks: 
 {subtasks}
 
-Results Completed So Far:
+Results so far:
 {results}
 
-Please refine the subtasks:
-- Improve clarity
-- Remove duplicates
-- Add any missing tasks
-Return ONLY the refined subtasks as a bullet list.
+Check if any tasks are:
+- Missing
+- Repetitive
+- Vague
+
+Fix and return the improved subtask list.
 """
+
 )
 
 refine_chain = LLMChain(llm=llm, prompt=prompt)

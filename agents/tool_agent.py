@@ -7,7 +7,7 @@ import os
 
 load_dotenv()
 
-# ✅ LLM Setup
+# ✅ LLM setup
 llm = ChatOpenAI(
     temperature=0,
     model_name="gpt-3.5-turbo",
@@ -15,70 +15,72 @@ llm = ChatOpenAI(
     openai_api_base=os.getenv("OPENAI_API_BASE", "https://openrouter.ai/api/v1")
 )
 
-# ✅ Calculator Tool
+# ✅ Tool 1: Calculator
 @tool
 def calculator(expression: str) -> str:
-    """Useful for solving math problems like 2+2, 7*3, etc."""
+    """Useful for solving math problems like 2+2, 7*3, 2*2*3 etc."""
     try:
         return str(eval(expression))
     except Exception as e:
         return f"Error: {e}"
 
-# ✅ CodeHelper Tool
+# ✅ Tool 2: Code Helper for programming queries
 @tool
 def code_helper(task: str) -> str:
-    """Use this for programming-related questions: Java, Python, etc."""
-    prompt = f"You are a helpful programming assistant. Help with: {task}"
+    """Helpful for programming questions like Java/Python/C++ syntax or logic."""
     try:
+        prompt = f"Give a clear example or explanation for this programming task:\n\n{task}"
         return llm.invoke(prompt).content
     except Exception as e:
         return f"CodeHelper error: {e}"
 
-# ✅ Tavily Search Tool
+# ✅ Tool 3: Web search using Tavily
 tavily_key = os.getenv("TAVILY_API_KEY")
 search = TavilySearchResults(api_key=tavily_key)
 
-# ✅ Tool List
+# ✅ Define tools list with priority descriptions
 tools = [
-    Tool.from_function(
-        func=calculator,
-        name="Calculator",
-        description="Use for arithmetic or math expressions like '2+2' or '15 / 3'."
-    ),
     Tool.from_function(
         func=code_helper,
         name="CodeHelper",
-        description="Use for logic, programming, or code-based questions like 'create array in Java'."
+        description="Highly recommended for programming/code-related questions like 'create array in Java' or 'Python sorting example'"
+    ),
+    Tool.from_function(
+        func=calculator,
+        name="Calculator",
+        description="Use for arithmetic or math expressions. Input like '15 / 3' or '2+2'"
     ),
     search
 ]
 
-# ✅ System Prompt to Guide the Agent
+# ✅ System message to guide tool selection
 system_instruction = (
-    "You are an intelligent assistant who solves tasks using the following tools:\n\n"
-    "- Calculator: Use for numeric or arithmetic tasks.\n"
-    "- CodeHelper: Use for programming or code-based questions (e.g., Java, Python).\n"
-    "- TavilySearchResults: Use for general search or informational lookups from the web.\n\n"
-    "Always reason step-by-step. Use this format:\n"
-    "Thought: ...\n"
-    "Action: ...\n"
-    "Action Input: ...\n"
-    "Observation: ...\n"
-    "Final Answer: ..."
+    "You are a helpful assistant who must always choose a tool to solve tasks.\n"
+    "Use this reasoning format:\n"
+    "Thought: Your reasoning\n"
+    "Action: The tool to use (CodeHelper, Calculator, TavilySearchResults)\n"
+    "Action Input: What to pass to the tool\n"
+    "Observation: What the tool returned\n"
+    "Final Answer: What the user needs\n\n"
+    "Always pick CodeHelper for any coding-related or syntax questions."
 )
 
-# ✅ Agent Initialization
+# ✅ Create the AgentExecutor
 agent = initialize_agent(
     tools=tools,
     llm=llm,
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
     agent_kwargs={"system_message": system_instruction},
-    verbose=True,
+    verbose=False,
     handle_parsing_errors=True,
 )
 
-# ✅ ToolAgent Entry Point
+# ✅ The agent wrapper function
 def tool_agent(task: str) -> str:
+    # Optional shortcut for coding tasks
+    keywords = ["array in java", "create array", "java array", "python", "syntax", "loop", "code"]
+    if any(k in task.lower() for k in keywords):
+        return f"Result: {code_helper(task)}"
     try:
         result = agent.run(task)
         return f"Result: {result}"

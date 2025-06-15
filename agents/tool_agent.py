@@ -40,24 +40,30 @@ tools = [
 
 # ✅ Force tools to be used via system message
 system_instruction = (
-    "You are an intelligent agent. You MUST always respond in the following format:\n"
-    "Thought: describe what you are thinking\n"
-    "Action: the tool to use (Calculator or TavilySearchResults)\n"
-    "Action Input: the input to the tool\n"
-    "When you get a result, reply like this:\n"
-    "Observation: tool output\n"
-    "Final Answer: the final result\n"
+    "You are an intelligent assistant that uses tools.\n"
+    "When solving a problem, always use this format:\n\n"
+    "Thought: Think about the task.\n"
+    "Action: Tool name to use (Calculator or TavilySearchResults)\n"
+    "Action Input: The input you pass to the tool\n"
+    "Observation: Output from the tool\n"
+    "Final Answer: Your final result\n\n"
+    "Example:\n"
+    "Thought: I need to calculate 2+2\n"
+    "Action: Calculator\n"
+    "Action Input: 2+2\n"
+    "Observation: 4\n"
+    "Final Answer: 4"
 )
 
-# ✅ Custom prompt wrapper for tools
 agent = initialize_agent(
     tools=tools,
     llm=llm,
     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+    agent_kwargs={"system_message": system_instruction},
     verbose=True,
     handle_parsing_errors=True,
-    agent_kwargs={"system_message": system_instruction}
 )
+
 
 # ✅ Tool Agent function
 def tool_agent(task: str) -> str:

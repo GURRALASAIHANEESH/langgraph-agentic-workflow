@@ -26,17 +26,36 @@ def run_tool(state: GraphState) -> GraphState:
     }
 
 def should_continue(state: GraphState) -> str:
+    """
+    Determines whether the graph should continue execution or end.
+    The graph ends if the 'done' flag is set or if there are no subtasks left.
+    """
     return "end" if state.get("done") or not state["subtasks"] else "continue"
 
 def build_graph():
+    """
+    Builds and compiles the LangGraph workflow.
+    """
     builder = StateGraph(GraphState)
     builder.add_node("Plan", add_plan)
     builder.add_node("Refine", refine_tasks)
     builder.add_node("Execute", run_tool)
     builder.add_node("Reflect", reflect_on_results)
+
     builder.set_entry_point("Plan")
     builder.add_edge("Plan", "Refine")
     builder.add_edge("Refine", "Execute")
-    builder.add_conditional_edges("Execute", should_continue, {"continue": "Reflect", "end": END})
-    builder.add_conditional_edges("Reflect", should_continue, {"continue": "Refine", "end": END})
+
+    # Conditional edges using the should_continue function
+    builder.add_conditional_edges(
+        "Execute",
+        should_continue,
+        {"continue": "Reflect", "end": END}
+    )
+    builder.add_conditional_edges(
+        "Reflect",
+        should_continue,
+        {"continue": "Refine", "end": END}
+    )
+
     return builder.compile()

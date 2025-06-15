@@ -1,5 +1,9 @@
 import streamlit as st
 from workflows.workflow import build_graph
+import os
+
+st.write("🔑 OPENAI_API_KEY exists:", bool(os.getenv("OPENAI_API_KEY")))
+st.write("🌍 OPENAI_API_BASE:", os.getenv("OPENAI_API_BASE"))
 
 graph = build_graph()
 

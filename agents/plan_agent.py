@@ -36,7 +36,12 @@ chain = LLMChain(llm=llm, prompt=prompt)
 def plan_agent(user_input: str) -> list:
     if re.fullmatch(r"\s*\d+\s*[\+\-\*/]\s*\d+\s*", user_input):
         return [user_input.strip()]
+    
     response = chain.invoke({"input": user_input})
     text = response.get("text", str(response))
+    
     print("🔍 PlanAgent Output:\n", text)
-    return [line.strip("-• \n") for line in text.split("\n") if line.strip()]
+    
+    # Extract only lines that look like subtasks
+    return [line.strip("-• \n") for line in text.split("\n") if re.search(r'[a-zA-Z]', line)]
+

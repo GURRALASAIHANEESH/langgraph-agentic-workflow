@@ -77,10 +77,15 @@ agent = initialize_agent(
 
 # ✅ The agent wrapper function
 def tool_agent(task: str) -> str:
-    # Optional shortcut for coding tasks
-    keywords = ["array in java", "create array", "java array", "python", "syntax", "loop", "code"]
-    if any(k in task.lower() for k in keywords):
-        return f"Result: {code_helper(task)}"
+    # Force code tool for dev/coding tasks
+    dev_keywords = ["array", "java", "python", "c++", "loop", "syntax", "initialize", "define", "program", "variable"]
+    if any(k in task.lower() for k in dev_keywords):
+        try:
+            return f"Result: {code_helper(task)}"
+        except Exception as e:
+            return f"CodeHelper error: {e}"
+
+    # Otherwise, use the agent for reasoning and external queries
     try:
         result = agent.run(task)
         return f"Result: {result}"

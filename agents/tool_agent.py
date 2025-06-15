@@ -39,6 +39,9 @@ agent = initialize_agent(
 
 def tool_agent(task: str) -> str:
     try:
-        return agent.run(task)
+        response = agent.run(task)
+        if not isinstance(response, str) or response.strip() == "":
+            return "No useful result from tool."
+        return f"Result: {response}"
     except Exception as e:
-        return f"Tool error: {e}"
+        return f"Error during execution: {str(e)}"

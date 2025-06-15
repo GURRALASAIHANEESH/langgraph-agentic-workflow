@@ -33,17 +33,23 @@ Reply with:
 reflect_chain = LLMChain(llm=llm, prompt=prompt)
 
 def reflect_on_results(state):
-    response = reflect_chain.run({
+    response = reflect_chain.invoke({
         "input": state["input"],
         "results": "\n".join(state["results"])
     })
-    if "NO" in response.upper():
-        state["retry_count"] = state.get("retry_count", 0) + 1
-        if state["retry_count"] > 2:
-            state["done"] = True  # Break infinite loop
+
+    answer = response.get("text", str(response)).strip().upper()
+    print("🪞 Reflect says:", answer)
+
+    state["retry_count"] = state.get("retry_count", 0) + 1
+    if "NO" in answer:
+        # Allow only 2 retries
+        if state["retry_count"] >= 2:
+            print("⚠️ Max retries hit. Forcing end.")
+            state["done"] = True
         else:
-            state["done"] = False # Corrected indentation
+            state["done"] = False
     else:
-        state["done"] = True # Corrected indentation
+        state["done"] = True
 
     return state
